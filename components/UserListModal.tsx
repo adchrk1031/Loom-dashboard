@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Modal from '@/components/Modal';
+import { Modal } from '@/components/Modal';
 import { User, Calendar, Tag, MessageSquare } from 'lucide-react';
 
 interface UserData {
@@ -57,8 +57,8 @@ export default function UserListModal({ isOpen, onClose, users, title }: UserLis
                                                 {user.displayName}
                                             </h4>
                                             <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${user.status === 'paid'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-gray-100 text-gray-600'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-600'
                                                 }`}>
                                                 {user.status === 'paid' ? '有料会員' : '無料会員'}
                                             </span>

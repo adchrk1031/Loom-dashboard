@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 
-export default function CopyUrlButton({ url }: { url: string }) {
+export default function CopyUrlButton({ url, className }: { url: string; className?: string }) {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = async () => {
@@ -19,7 +19,7 @@ export default function CopyUrlButton({ url }: { url: string }) {
     return (
         <button
             onClick={handleCopy}
-            className="p-1.5 hover:bg-background-alt rounded transition-colors"
+            className={className || "p-1.5 hover:bg-background-alt rounded transition-colors"}
             title="URLをコピー"
         >
             {copied ? (

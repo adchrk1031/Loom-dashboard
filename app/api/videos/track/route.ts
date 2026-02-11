@@ -38,17 +38,9 @@ export async function POST(request: NextRequest) {
             },
         });
 
-        // 動画の視聴回数を更新（初回視聴時のみ）
-        if (viewingLog.watchTime === watchTime) {
-            await prisma.content.update({
-                where: { id: videoId },
-                data: {
-                    viewCount: {
-                        increment: 1,
-                    },
-                },
-            });
-        }
+        // NOTE: viewCountフィールドはContentモデルに存在しないため、
+        // 視聴回数のカウントは削除しました。
+        // 必要に応じてスキーマにviewCountフィールドを追加してください。
 
         return NextResponse.json({
             success: true,

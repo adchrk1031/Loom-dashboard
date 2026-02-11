@@ -41,11 +41,17 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         case 'UPDATE_BLOCK':
             return {
                 ...state,
-                blocks: state.blocks.map((block) =>
-                    block.id === action.id
-                        ? { ...block, props: { ...block.props, ...action.props } }
-                        : block
-                ),
+                blocks: state.blocks.map((block) => {
+                    if (block.id !== action.id) return block;
+
+                    // ImageBlockとCodeBlockはcontentプロパティを使用
+                    if (block.type === 'image' || block.type === 'code') {
+                        return { ...block, content: { ...block.content, ...action.props } };
+                    }
+
+                    // その他のブロックはpropsプロパティを使用
+                    return { ...block, props: { ...block.props, ...action.props } };
+                }),
                 isDirty: true,
             };
         case 'DELETE_BLOCK':
