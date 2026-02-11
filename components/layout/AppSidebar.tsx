@@ -12,6 +12,7 @@ import {
     MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 const menuItems = [
     {
@@ -108,7 +109,17 @@ export default function AppSidebar() {
             </nav>
 
             {/* フッター */}
-            <div className="p-4 border-t border-border">
+            <div className="p-4 border-t border-border space-y-3">
+                <button
+                    onClick={async () => {
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                        window.location.href = '/login';
+                    }}
+                    className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98]"
+                >
+                    ログアウト
+                </button>
                 <p className="text-xs text-text-secondary text-center">
                     © 2026 Loom
                 </p>

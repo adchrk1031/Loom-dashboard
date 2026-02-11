@@ -8,6 +8,7 @@ import { QuickSearchBar } from '@/components/QuickSearchBar';
 import UserListModal from '@/components/UserListModal';
 import VideoRankingSlideOver from '@/components/VideoRankingSlideOver';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 interface TodayUser {
     id: string;
@@ -82,15 +83,45 @@ export default function DashboardPage() {
 
     // 初期データ読み込み
     useEffect(() => {
+        const supabase = createClient();
+
         const fetchInitialData = async () => {
             setIsLoading(true);
             try {
-                // 統計データを取得（モックデータ）
+                // 本日の登録者数を取得
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const { count: todayCount } = await supabase
+                    .from('User')
+                    .select('*', { count: 'exact', head: true })
+                    .gte('createdAt', today.toISOString());
+
+                // 総ユーザー数を取得
+                const { count: totalCount } = await supabase
+                    .from('User')
+                    .select('*', { count: 'exact', head: true });
+
+                // 動画完了率を計算
+                const { data: watchLogs } = await supabase
+                    .from('WatchLog')
+                    .select('isCompleted');
+
+                const completedCount = watchLogs?.filter(log => log.isCompleted).length || 0;
+                const totalWatchCount = watchLogs?.length || 1;
+                const completionRate = (completedCount / totalWatchCount) * 100;
+
+                // アクティブシーケンス数を取得
+                const { count: activeSequenceCount } = await supabase
+                    .from('Sequence')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('isActive', true);
+
+                // 統計データを設定
                 setStats({
-                    todayCount: 24,
-                    totalCount: 1248,
-                    completionRate: 68.5,
-                    activeSequenceCount: 12,
+                    todayCount: todayCount || 0,
+                    totalCount: totalCount || 0,
+                    completionRate: parseFloat(completionRate.toFixed(1)),
+                    activeSequenceCount: activeSequenceCount || 0,
                 });
 
                 // 実行中シーケンスを取得
@@ -110,6 +141,44 @@ export default function DashboardPage() {
         };
 
         fetchInitialData();
+
+        // リアルタイム更新を設定
+        const channel = supabase
+            .channel('dashboard-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'User',
+                },
+                async (payload) => {
+                    console.log('New user registered:', payload);
+                    // 統計データを再取得
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const { count: todayCount } = await supabase
+                        .from('User')
+                        .select('*', { count: 'exact', head: true })
+                        .gte('createdAt', today.toISOString());
+
+                    const { count: totalCount } = await supabase
+                        .from('User')
+                        .select('*', { count: 'exact', head: true });
+
+                    setStats(prev => ({
+                        ...prev,
+                        todayCount: todayCount || 0,
+                        totalCount: totalCount || 0,
+                    }));
+                }
+            )
+            .subscribe();
+
+        // クリーンアップ
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     // 本日の登録者を取得
