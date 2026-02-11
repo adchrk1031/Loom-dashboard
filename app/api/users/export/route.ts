@@ -28,17 +28,16 @@ export async function GET(request: NextRequest) {
         }
 
         // CSVヘッダー
-        const headers = ['名前', 'LINEユーザーID', '登録日', '流入経路', 'タグ'];
+        const headers = ['名前', 'LINEユーザーID', '登録日', 'タグ'];
 
         // CSVデータ行
         const rows = users.map((user) => {
             const name = user.displayName || '未設定';
             const lineId = user.lineId;
             const createdAt = new Date(user.createdAt).toLocaleDateString('ja-JP');
-            const source = user.source || '不明';
             const tags = user.tags.join(', ') || '未分類';
 
-            return [name, lineId, createdAt, source, tags];
+            return [name, lineId, createdAt, tags];
         });
 
         // CSV文字列を生成
