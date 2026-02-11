@@ -15,13 +15,13 @@ export async function GET(request: NextRequest) {
             where: {
                 OR: [
                     {
-                        name: {
+                        displayName: {
                             contains: query,
                             mode: 'insensitive',
                         },
                     },
                     {
-                        lineUserId: {
+                        lineId: {
                             contains: query,
                             mode: 'insensitive',
                         },
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
             },
             select: {
                 id: true,
-                name: true,
-                lineUserId: true,
+                displayName: true,
+                lineId: true,
                 tags: true,
             },
             take: 10, // 最大10件
