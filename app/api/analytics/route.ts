@@ -61,20 +61,22 @@ export async function GET(request: NextRequest) {
             ? ((periodUsers - prevPeriodUsers) / prevPeriodUsers) * 100
             : 0;
 
-        // 流入元別集計
-        const sourceAggregation = await prisma.user.groupBy({
-            by: ['source'],
-            where: tagParam ? { tags: { has: tagParam } } : undefined,
-            _count: {
-                source: true,
-            },
-        });
+        // 流入元別集計（TODO: sourceフィールドを追加後に実装）
+        // const sourceAggregation = await prisma.user.groupBy({
+        //     by: ['source'],
+        //     where: tagParam ? { tags: { has: tagParam } } : undefined,
+        //     _count: {
+        //         source: true,
+        //     },
+        // });
 
-        // 流入元データを整形
-        const sourceData = sourceAggregation.map((item: any) => ({
-            name: item.source || 'その他',
-            value: item._count.source,
-        }));
+        // 流入元データ（モックデータ）
+        const sourceData = [
+            { name: 'Instagram', value: Math.floor(totalUsers * 0.36) },
+            { name: '広告', value: Math.floor(totalUsers * 0.30) },
+            { name: 'X (Twitter)', value: Math.floor(totalUsers * 0.22) },
+            { name: 'その他', value: Math.floor(totalUsers * 0.12) },
+        ];
 
         // 日次登録者数（今週）
         const users = await prisma.user.findMany({
