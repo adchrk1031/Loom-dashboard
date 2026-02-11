@@ -16,9 +16,7 @@ export async function GET(request: NextRequest) {
                     select: {
                         id: true,
                         title: true,
-                        thumbnailUrl: true,
-                        duration: true,
-                        viewCount: true,
+                        videoUrl: true,
                     },
                 },
                 user: {
@@ -41,9 +39,7 @@ export async function GET(request: NextRequest) {
         const videoStats = new Map<string, {
             id: string;
             title: string;
-            thumbnailUrl: string | null;
-            duration: number | null;
-            viewCount: number;
+            videoUrl: string;
             totalWatchTime: number;
             completionCount: number;
             viewerCount: number;
@@ -55,9 +51,7 @@ export async function GET(request: NextRequest) {
                 videoStats.set(videoId, {
                     id: log.content.id,
                     title: log.content.title,
-                    thumbnailUrl: log.content.thumbnailUrl,
-                    duration: log.content.duration,
-                    viewCount: log.content.viewCount,
+                    videoUrl: log.content.videoUrl,
                     totalWatchTime: 0,
                     completionCount: 0,
                     viewerCount: 0,
@@ -68,8 +62,8 @@ export async function GET(request: NextRequest) {
             stats.totalWatchTime += log.watchTime;
             stats.viewerCount += 1;
 
-            // 完走判定（視聴時間が動画の90%以上）
-            if (log.content.duration && log.watchTime >= log.content.duration * 0.9) {
+            // 完走判定（isCompletedフラグを使用）
+            if (log.isCompleted) {
                 stats.completionCount += 1;
             }
         });
@@ -79,9 +73,7 @@ export async function GET(request: NextRequest) {
             .map((stats) => ({
                 id: stats.id,
                 title: stats.title,
-                thumbnailUrl: stats.thumbnailUrl,
-                duration: stats.duration,
-                viewCount: stats.viewCount,
+                videoUrl: stats.videoUrl,
                 completionRate: stats.viewerCount > 0
                     ? (stats.completionCount / stats.viewerCount) * 100
                     : 0,
