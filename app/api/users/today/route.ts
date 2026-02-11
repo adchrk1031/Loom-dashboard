@@ -34,9 +34,8 @@ export async function GET(request: NextRequest) {
             where: whereCondition,
             select: {
                 id: true,
-                name: true,
-                lineUserId: true,
-                source: true,
+                displayName: true,
+                lineId: true,
                 tags: true,
                 createdAt: true,
             },
