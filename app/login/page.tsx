@@ -85,8 +85,8 @@ export default function LoginPage() {
                         <button
                             onClick={() => setMode('login')}
                             className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all duration-200 ${mode === 'login'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             ログイン
@@ -94,8 +94,8 @@ export default function LoginPage() {
                         <button
                             onClick={() => setMode('signup')}
                             className={`flex-1 py-2 px-4 rounded-xl font-semibold transition-all duration-200 ${mode === 'signup'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             新規登録
@@ -162,24 +162,13 @@ export default function LoginPage() {
                             type="submit"
                             disabled={loading}
                             className={`w-full py-3 text-white font-bold rounded-xl hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${mode === 'login'
-                                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
-                                    : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                                : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
                                 }`}
                         >
                             {loading ? (mode === 'login' ? 'ログイン中...' : '登録中...') : (mode === 'login' ? 'ログイン' : '新規登録')}
                         </button>
                     </form>
-
-                    {/* 管理者ログイン情報 */}
-                    {mode === 'login' && (
-                        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-                            <p className="text-xs font-semibold text-blue-900 mb-2">📋 管理者ログイン情報</p>
-                            <p className="text-xs text-blue-800 font-mono">
-                                <span className="font-semibold">メール:</span> admin@loom.com<br />
-                                <span className="font-semibold">パスワード:</span> LoomAdmin2026!
-                            </p>
-                        </div>
-                    )}
                 </div>
 
                 {/* フッター */}

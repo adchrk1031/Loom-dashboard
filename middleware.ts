@@ -1,9 +1,58 @@
-import { type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/middleware';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-    // Supabaseセッションを更新
-    const response = await updateSession(request);
+    let response = NextResponse.next({
+        request: {
+            headers: request.headers,
+        },
+    });
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return request.cookies.get(name)?.value;
+                },
+                set(name: string, value: string, options: CookieOptions) {
+                    request.cookies.set({
+                        name,
+                        value,
+                        ...options,
+                    });
+                    response = NextResponse.next({
+                        request: {
+                            headers: request.headers,
+                        },
+                    });
+                    response.cookies.set({
+                        name,
+                        value,
+                        ...options,
+                    });
+                },
+                remove(name: string, options: CookieOptions) {
+                    request.cookies.set({
+                        name,
+                        value: '',
+                        ...options,
+                    });
+                    response = NextResponse.next({
+                        request: {
+                            headers: request.headers,
+                        },
+                    });
+                    response.cookies.set({
+                        name,
+                        value: '',
+                        ...options,
+                    });
+                },
+            },
+        }
+    );
 
     // 保護されたルートのリスト
     const protectedRoutes = ['/dashboard', '/chat', '/contents', '/funnels', '/sequences', '/analytics'];
@@ -15,23 +64,13 @@ export async function middleware(request: NextRequest) {
 
     // 保護されたルートの場合、認証をチェック
     if (isProtectedRoute) {
-        const supabaseResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
-            {
-                headers: {
-                    Authorization: request.cookies.get('sb-access-token')?.value
-                        ? `Bearer ${request.cookies.get('sb-access-token')?.value}`
-                        : '',
-                    apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-                },
-            }
-        );
+        const { data: { user } } = await supabase.auth.getUser();
 
         // 認証されていない場合、ログインページにリダイレクト
-        if (!supabaseResponse.ok) {
+        if (!user) {
             const url = request.nextUrl.clone();
             url.pathname = '/login';
-            return Response.redirect(url);
+            return NextResponse.redirect(url);
         }
     }
 
