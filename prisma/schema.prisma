@@ -1,0 +1,162 @@
+// Antigravity (UTAGE風マーケティングオートメーション) データベーススキーマ
+// PostgreSQL (Supabase) + Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// User: LINEユーザー情報
+// ========================================
+model User {
+  id          String   @id @default(cuid())
+  lineId      String   @unique @map("line_id") // LINE User ID
+  displayName String?  @map("display_name") // 表示名
+  email       String?  @unique // メールアドレス（任意）
+  status      UserStatus @default(FREE) // 会員ステータス
+  tags        String[] @default([]) // タグ（配列型で柔軟に管理）
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  viewingLogs ViewingLog[]
+  sequenceProgresses SequenceProgress[]
+
+  @@index([lineId]) // LINE IDでの検索を高速化
+  @@index([status]) // ステータスでのフィルタリングを高速化
+  @@index([createdAt]) // 登録日時での並び替えを高速化
+  @@map("users")
+}
+
+enum UserStatus {
+  FREE  // 無料会員
+  PAID  // 有料会員
+}
+
+// ========================================
+// Funnel: ランディングページ（LP）管理
+// ========================================
+model Funnel {
+  id            String   @id @default(cuid())
+  name          String   // LP名
+  slug          String   @unique // URLパス（例: /lp/campaign-2024）
+  isPublished   Boolean  @default(false) @map("is_published") // 公開設定
+  publishedData Json?    @map("published_data") // エディタで保存したJSONデータ
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  contents Content[]
+
+  @@index([slug]) // URLパスでの検索を高速化
+  @@index([isPublished]) // 公開状態でのフィルタリングを高速化
+  @@map("funnels")
+}
+
+// ========================================
+// Content: 動画コンテンツ管理
+// ========================================
+model Content {
+  id                String   @id @default(cuid())
+  funnelId          String   @map("funnel_id") // 紐づくFunnel
+  title             String   // コンテンツタイトル
+  videoUrl          String   @map("video_url") // 動画URL
+  unlockCondition   Json?    @map("unlock_condition") // 視聴制限条件（JSON形式で柔軟に管理）
+  // 例: { "type": "days_after_registration", "days": 3 }
+  // 例: { "type": "after_content", "contentId": "xxx" }
+  sortOrder         Int      @default(0) @map("sort_order") // 表示順序
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  funnel      Funnel       @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  viewingLogs ViewingLog[]
+
+  @@index([funnelId]) // Funnelでの検索を高速化
+  @@index([sortOrder]) // 表示順序での並び替えを高速化
+  @@map("contents")
+}
+
+// ========================================
+// Sequence: ステップ配信設定
+// ========================================
+model Sequence {
+  id              String   @id @default(cuid())
+  name            String   // シーケンス名（例: 「7日間育成シーケンス」）
+  stepNumber      Int      @map("step_number") // ステップ番号（1, 2, 3...）
+  triggerType     TriggerType @map("trigger_type") // トリガータイプ
+  delayMinutes    Int      @default(0) @map("delay_minutes") // 送信タイミング（分単位）
+  messageContent  Json     @map("message_content") // メッセージ内容（JSON形式）
+  // 例: { "type": "text", "text": "こんにちは！" }
+  // 例: { "type": "flex", "contents": {...} }
+  isActive        Boolean  @default(true) @map("is_active") // 有効/無効
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  sequenceProgresses SequenceProgress[]
+
+  @@index([name]) // シーケンス名での検索を高速化
+  @@index([stepNumber]) // ステップ番号での並び替えを高速化
+  @@index([isActive]) // 有効なシーケンスのフィルタリングを高速化
+  @@map("sequences")
+}
+
+enum TriggerType {
+  REGISTRATION      // 登録時
+  DAYS_AFTER        // n日後
+  CONTENT_COMPLETED // コンテンツ完了時
+  MANUAL            // 手動トリガー
+}
+
+// ========================================
+// SequenceProgress: ユーザーごとのシーケンス進捗
+// ========================================
+model SequenceProgress {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  sequenceId      String   @map("sequence_id")
+  currentStep     Int      @default(1) @map("current_step") // 現在のステップ
+  nextSendAt      DateTime? @map("next_send_at") // 次回送信予定日時
+  completedAt     DateTime? @map("completed_at") // 完了日時
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sequence Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sequenceId]) // 1ユーザー1シーケンスは1レコードのみ
+  @@index([nextSendAt]) // 送信予定日時での検索を高速化（バッチ処理用）
+  @@index([userId]) // ユーザーごとの進捗検索を高速化
+  @@map("sequence_progresses")
+}
+
+// ========================================
+// ViewingLog: 視聴ログ（書き込み頻度が高い）
+// ========================================
+model ViewingLog {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  contentId   String   @map("content_id")
+  watchTime   Int      @default(0) @map("watch_time") // 視聴時間（秒）
+  isCompleted Boolean  @default(false) @map("is_completed") // 完走フラグ
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // リレーション
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentId]) // 1ユーザー1コンテンツは1レコードのみ（更新で対応）
+  @@index([userId]) // ユーザーごとの視聴履歴検索を高速化
+  @@index([contentId]) // コンテンツごとの視聴統計を高速化
+  @@index([isCompleted]) // 完走率の集計を高速化
+  @@index([createdAt]) // 時系列分析を高速化
+  @@map("viewing_logs")
+}
