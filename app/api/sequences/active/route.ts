@@ -6,42 +6,47 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
     try {
         // 実行中のシーケンスを取得
-        // TODO: Sequenceテーブルにstatusカラムを追加後、WHERE status = 'ACTIVE' でフィルター
+        // nameでグループ化して、各シーケンスのステップ数を計算
         const sequences = await prisma.sequence.findMany({
+            where: {
+                isActive: true,
+            },
             select: {
                 id: true,
                 name: true,
-                steps: true,
+                stepNumber: true,
                 createdAt: true,
                 updatedAt: true,
             },
             orderBy: {
                 updatedAt: 'desc',
             },
-            take: 10, // 最新10件
         });
 
-        // シーケンスごとの統計を計算
-        const activeSequences = sequences.map((seq) => {
-            // stepsはJSON配列なので、パースして件数を取得
-            let stepCount = 0;
-            try {
-                const stepsArray = Array.isArray(seq.steps) ? seq.steps : JSON.parse(seq.steps as any);
-                stepCount = stepsArray.length;
-            } catch (e) {
-                stepCount = 0;
+        // nameでグループ化
+        const sequenceMap = new Map<string, any>();
+        sequences.forEach((seq) => {
+            if (!sequenceMap.has(seq.name)) {
+                sequenceMap.set(seq.name, {
+                    id: seq.id,
+                    name: seq.name,
+                    stepCount: 0,
+                    updatedAt: seq.updatedAt,
+                });
             }
+            const current = sequenceMap.get(seq.name);
+            current.stepCount = Math.max(current.stepCount, seq.stepNumber);
+        });
 
-            return {
-                id: seq.id,
-                name: seq.name,
-                stepCount,
-                // TODO: 実際の対象者数を計算（SequenceEnrollmentテーブルなどから）
+        // 最新10件に制限
+        const activeSequences = Array.from(sequenceMap.values())
+            .slice(0, 10)
+            .map((seq) => ({
+                ...seq,
+                // TODO: 実際の対象者数を計算（SequenceProgressテーブルから）
                 targetCount: Math.floor(Math.random() * 500) + 50, // モックデータ
                 status: 'active' as const,
-                updatedAt: seq.updatedAt,
-            };
-        });
+            }));
 
         return NextResponse.json({
             sequences: activeSequences,
