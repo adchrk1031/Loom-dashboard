@@ -252,7 +252,7 @@ export default function AnalyticsPage() {
                     データ分析
                 </h1>
                 <div className="flex items-center gap-4">
-                    <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+                    <DateRangePicker dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />
                     <button
                         onClick={handleExportCSV}
                         className="flex items-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl font-bold hover:border-green-500 hover:bg-green-50 hover:text-green-700 hover:shadow-lg transition-all duration-300 ease-in-out"
