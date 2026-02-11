@@ -47,9 +47,9 @@ export default function SequencesPage() {
                     <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
                         <button
                             onClick={() => setViewMode('card')}
-                            className={`p-2 rounded-lg transition-all duration-150 active:scale-95 ${viewMode === 'card'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                            className={`p-2 rounded-lg transition-all duration-200 active:scale-[0.98] ${viewMode === 'card'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             title="カードビュー"
                         >
@@ -57,9 +57,9 @@ export default function SequencesPage() {
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-lg transition-all duration-150 active:scale-95 ${viewMode === 'list'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                            className={`p-2 rounded-lg transition-all duration-200 active:scale-[0.98] ${viewMode === 'list'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             title="リストビュー"
                         >
@@ -95,8 +95,8 @@ export default function SequencesPage() {
                             <div className="flex items-center gap-2 mb-4">
                                 <span
                                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${seq.isActive
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-gray-100 text-gray-600'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-100 text-gray-600'
                                         }`}
                                 >
                                     {seq.isActive ? '✓ 稼働中' : '● 停止中'}
@@ -212,8 +212,8 @@ export default function SequencesPage() {
                                     <td className="py-4 px-4">
                                         <span
                                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${seq.isActive
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-gray-100 text-gray-600'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-600'
                                                 }`}
                                         >
                                             {seq.isActive ? '稼働中' : '停止中'}

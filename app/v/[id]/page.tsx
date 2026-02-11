@@ -294,7 +294,7 @@ export default function PublicVideoPage() {
                                             <img
                                                 src={relVideo.thumbnailUrl}
                                                 alt={relVideo.title}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-200"
                                             />
                                             {relVideo.duration && (
                                                 <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/90 backdrop-blur-sm text-white text-xs font-bold rounded-lg">

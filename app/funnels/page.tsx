@@ -20,9 +20,9 @@ export default function FunnelsPage() {
                     <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
                         <button
                             onClick={() => setViewMode('card')}
-                            className={`p-2 rounded-lg transition-all duration-150 active:scale-95 ${viewMode === 'card'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                            className={`p-2 rounded-lg transition-all duration-200 active:scale-[0.98] ${viewMode === 'card'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             title="カードビュー"
                         >
@@ -30,9 +30,9 @@ export default function FunnelsPage() {
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-lg transition-all duration-150 active:scale-95 ${viewMode === 'list'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                            className={`p-2 rounded-lg transition-all duration-200 active:scale-[0.98] ${viewMode === 'list'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             title="リストビュー"
                         >
@@ -128,9 +128,9 @@ function FunnelCard({ funnel }: { funnel: Funnel }) {
                 {/* アクティブ/非アクティブ切り替え */}
                 <button
                     onClick={handleToggleActive}
-                    className={`flex-shrink-0 ml-3 p-2 rounded-xl transition-all duration-200 active:scale-95 ${isActive
-                            ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                    className={`flex-shrink-0 ml-3 p-2 rounded-xl transition-all duration-200 active:scale-[0.98] ${isActive
+                        ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                         }`}
                     title={isActive ? '公開中' : '非公開'}
                 >
@@ -142,8 +142,8 @@ function FunnelCard({ funnel }: { funnel: Funnel }) {
             <div className="flex items-center gap-2 mb-4">
                 <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-600'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
                         }`}
                 >
                     {isActive ? '✓ 公開中' : '● 非公開'}
@@ -216,8 +216,8 @@ function FunnelRow({ funnel }: { funnel: Funnel }) {
             <td className="py-4 px-4">
                 <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-600'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
                         }`}
                 >
                     {isActive ? '公開中' : '非公開'}
@@ -260,8 +260,8 @@ function FunnelRow({ funnel }: { funnel: Funnel }) {
                     <button
                         onClick={handleToggleActive}
                         className={`ios-button p-1.5 rounded-lg ${isActive
-                                ? 'bg-green-100 text-green-600'
-                                : 'bg-gray-100 text-gray-400'
+                            ? 'bg-green-100 text-green-600'
+                            : 'bg-gray-100 text-gray-400'
                             }`}
                         title={isActive ? '公開中' : '非公開'}
                     >

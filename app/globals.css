@@ -58,22 +58,22 @@
 }
 
 .ios-card:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .ios-card:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 /* iPhone風のボタンスタイル */
 .ios-button {
   border-radius: 1rem;
   font-weight: 700;
-  transition: all 0.15s;
+  transition: all 0.2s;
 }
 
 .ios-button:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 /* ブラー効果 */

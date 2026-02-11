@@ -70,7 +70,7 @@ export default function AppSidebar() {
     }, []);
 
     return (
-        <aside className="w-64 bg-white/80 backdrop-blur-md border-r border-border flex flex-col shadow-lg">
+        <aside className="hidden md:flex w-64 bg-white/80 backdrop-blur-md border-r border-border flex flex-col shadow-lg">
             {/* ロゴ・ヘッダー */}
             <div className="p-6 border-b border-border flex items-center justify-center">
                 <img src="/loom-logo.png" alt="Loom" className="h-10 w-auto" />

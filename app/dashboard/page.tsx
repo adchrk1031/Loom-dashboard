@@ -195,7 +195,7 @@ export default function DashboardPage() {
                 <div className="mb-8">
                     <button
                         onClick={() => router.push('/chat')}
-                        className="w-full bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6 hover:shadow-lg hover:scale-102 transition-all duration-150 cursor-pointer"
+                        className="w-full bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6 hover:shadow-lg hover:bg-opacity-95 transition-all duration-200 cursor-pointer"
                     >
                         <div className="flex items-center gap-4">
                             <div className="flex-shrink-0 p-3 bg-red-500 rounded-2xl">
@@ -238,8 +238,8 @@ export default function DashboardPage() {
 
                 {/* 総ユーザー数 */}
                 <button
-                    onClick={fetchAllUsers}
-                    className="ios-card p-8 text-left"
+                    onClick={() => router.push('/chat')}
+                    className="ios-card p-8 text-left hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
                 >
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-4 bg-green-50 rounded-2xl">
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                     <p className="text-4xl font-black text-black">
                         {stats.totalCount.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-400 mt-2">クリックで詳細表示</p>
+                    <p className="text-xs text-gray-400 mt-2">クリックでチャット画面へ</p>
                 </button>
 
                 {/* 動画完了率 */}
@@ -275,7 +275,10 @@ export default function DashboardPage() {
                 </button>
 
                 {/* アクティブシーケンス */}
-                <div className="bg-white rounded-2xl p-8 border-2 border-gray-100">
+                <button
+                    onClick={() => router.push('/sequences')}
+                    className="ios-card p-8 text-left hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
+                >
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-4 bg-orange-50 rounded-2xl">
                             <Zap className="w-8 h-8 text-orange-600" />
@@ -287,7 +290,8 @@ export default function DashboardPage() {
                     <p className="text-4xl font-black text-black">
                         {stats.activeSequenceCount}
                     </p>
-                </div>
+                    <p className="text-xs text-gray-400 mt-2">クリックでシーケンス管理へ</p>
+                </button>
             </div>
 
             {/* 実行中シーケンス管理パネル */}

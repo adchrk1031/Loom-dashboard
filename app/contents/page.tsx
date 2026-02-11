@@ -148,7 +148,7 @@ export default function ContentsPage() {
                     </h1>
                     <Link
                         href="/contents/new"
-                        className="flex items-center gap-2 px-7 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out"
+                        className="flex items-center gap-2 px-7 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 ease-in-out"
                     >
                         <Plus className="w-5 h-5" />
                         新しい動画を追加
@@ -204,7 +204,7 @@ export default function ContentsPage() {
                                             <img
                                                 src={video.thumbnailUrl}
                                                 alt={video.title}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                                                className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-200 ease-out"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">

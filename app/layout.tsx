@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AppSidebar from "@/components/layout/AppSidebar";
+import BottomNavigation from "@/components/BottomNavigation";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -27,10 +28,13 @@ export default function RootLayout({
                     <AppSidebar />
 
                     {/* メインコンテンツ */}
-                    <main className="flex-1 overflow-y-auto">
+                    <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
                         {children}
                     </main>
                 </div>
+
+                {/* モバイル用ボトムナビゲーション */}
+                <BottomNavigation />
             </body>
         </html>
     );

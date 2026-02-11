@@ -61,7 +61,7 @@ function RelatedVideoCard({ video, onClick }: { video: RelatedVideo; onClick: ()
     return (
         <button
             onClick={onClick}
-            className="w-full flex gap-3 p-2 rounded-2xl hover:bg-gray-50 active:scale-95 transition-all duration-150 group"
+            className="w-full flex gap-3 p-2 rounded-2xl hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 group"
         >
             {/* サムネイル */}
             <div className="relative flex-shrink-0 w-40 h-[90px] rounded-xl overflow-hidden bg-gray-200">
