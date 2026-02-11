@@ -3,9 +3,15 @@
 import { useEffect, useState } from 'react';
 import { Users, TrendingUp, Target, Download } from 'lucide-react';
 import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { format } from 'date-fns';
+
+// DateRange型定義
+interface DateRange {
+    from: Date | undefined;
+    to: Date | undefined;
+}
+
 
 // カラーマッピング（ダスティカラー）
 const sourceColors: Record<string, string> = {
