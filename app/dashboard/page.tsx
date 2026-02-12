@@ -9,6 +9,9 @@ import UserListModal from '@/components/UserListModal';
 import VideoRankingSlideOver from '@/components/VideoRankingSlideOver';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import DateRangePicker, { type ComparisonDateRange } from '@/components/ui/date-range-picker';
+import ComparisonChart from '@/components/charts/comparison-chart';
+import { format, eachDayOfInterval, subDays, startOfWeek, endOfWeek } from 'date-fns';
 
 interface TodayUser {
     id: string;
@@ -80,6 +83,20 @@ export default function DashboardPage() {
 
     // 未読数
     const [unreadCount, setUnreadCount] = useState(0);
+
+    // 比較グラフ用のステート
+    const [dateRange, setDateRange] = useState<ComparisonDateRange>(() => {
+        const now = new Date();
+        const mainFrom = subDays(now, 6);
+        const mainTo = now;
+        const compFrom = subDays(now, 13);
+        const compTo = subDays(now, 7);
+        return {
+            main: { from: mainFrom, to: mainTo },
+            comparison: { from: compFrom, to: compTo },
+        };
+    });
+    const [comparisonData, setComparisonData] = useState<any[]>([]);
 
     // 初期データ読み込み
     useEffect(() => {
@@ -180,6 +197,75 @@ export default function DashboardPage() {
             supabase.removeChannel(channel);
         };
     }, []);
+
+    // 比較グラフデータを取得
+    useEffect(() => {
+        const fetchComparisonData = async () => {
+            try {
+                const supabase = createClient();
+
+                // メイン期間のデータを取得
+                const mainDays = eachDayOfInterval({
+                    start: dateRange.main.from,
+                    end: dateRange.main.to,
+                });
+
+                // 比較期間のデータを取得
+                const compDays = eachDayOfInterval({
+                    start: dateRange.comparison.from,
+                    end: dateRange.comparison.to,
+                });
+
+                // 各日のユーザー登録数を取得
+                const mainData = await Promise.all(
+                    mainDays.map(async (day) => {
+                        const dayStart = new Date(day);
+                        dayStart.setHours(0, 0, 0, 0);
+                        const dayEnd = new Date(day);
+                        dayEnd.setHours(23, 59, 59, 999);
+
+                        const { count } = await supabase
+                            .from('User')
+                            .select('*', { count: 'exact', head: true })
+                            .gte('createdAt', dayStart.toISOString())
+                            .lte('createdAt', dayEnd.toISOString());
+
+                        return count || 0;
+                    })
+                );
+
+                const compData = await Promise.all(
+                    compDays.map(async (day) => {
+                        const dayStart = new Date(day);
+                        dayStart.setHours(0, 0, 0, 0);
+                        const dayEnd = new Date(day);
+                        dayEnd.setHours(23, 59, 59, 999);
+
+                        const { count } = await supabase
+                            .from('User')
+                            .select('*', { count: 'exact', head: true })
+                            .gte('createdAt', dayStart.toISOString())
+                            .lte('createdAt', dayEnd.toISOString());
+
+                        return count || 0;
+                    })
+                );
+
+                // グラフデータを作成
+                const chartData = mainDays.map((day, index) => ({
+                    date: format(day, 'M/d'),
+                    mainValue: mainData[index],
+                    comparisonValue: compData[index] || 0,
+                }));
+
+                setComparisonData(chartData);
+            } catch (error) {
+                console.error('Failed to fetch comparison data:', error);
+            }
+        };
+
+        fetchComparisonData();
+    }, [dateRange]);
 
     // 本日の登録者を取得
     const fetchTodayUsers = async () => {
@@ -361,6 +447,23 @@ export default function DashboardPage() {
                     </p>
                     <p className="text-xs text-gray-400 mt-2">クリックでシーケンス管理へ</p>
                 </button>
+            </div>
+
+            {/* 前週比較グラフ */}
+            <div className="mb-12">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-black text-black">
+                        登録者数の推移
+                    </h2>
+                    <DateRangePicker value={dateRange} onChange={setDateRange} />
+                </div>
+                <div className="ios-card p-8">
+                    <ComparisonChart
+                        data={comparisonData}
+                        mainLabel={`${format(dateRange.main.from, 'M/d')} - ${format(dateRange.main.to, 'M/d')}`}
+                        comparisonLabel={`${format(dateRange.comparison.from, 'M/d')} - ${format(dateRange.comparison.to, 'M/d')}`}
+                    />
+                </div>
             </div>
 
             {/* 実行中シーケンス管理パネル */}

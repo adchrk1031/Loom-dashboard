@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Play, Eye, Calendar, Plus, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
+import ViewToggle from '@/components/ui/view-toggle';
+import ListView from '@/components/views/list-view';
+import CardView from '@/components/views/card-view';
 
 interface Video {
     id: string;
@@ -38,6 +41,17 @@ export default function ContentsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterVisibility, setFilterVisibility] = useState<string>('ALL');
+    const [view, setView] = useState<'card' | 'list'>(() => {
+        if (typeof window !== 'undefined') {
+            return (localStorage.getItem('contentsView') as 'card' | 'list') || 'card';
+        }
+        return 'card';
+    });
+
+    // ビューが変更されたらローカルストレージに保存
+    useEffect(() => {
+        localStorage.setItem('contentsView', view);
+    }, [view]);
 
     useEffect(() => {
         // モックデータ（後でAPIから取得）
@@ -146,13 +160,16 @@ export default function ContentsPage() {
                     <h1 className="page-title">
                         動画管理
                     </h1>
-                    <Link
-                        href="/contents/new"
-                        className="flex items-center gap-2 px-7 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 ease-in-out"
-                    >
-                        <Plus className="w-5 h-5" />
-                        新しい動画を追加
-                    </Link>
+                    <div className="flex items-center gap-4">
+                        <ViewToggle view={view} onChange={setView} />
+                        <Link
+                            href="/contents/new"
+                            className="flex items-center gap-2 px-7 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 ease-in-out"
+                        >
+                            <Plus className="w-5 h-5" />
+                            新しい動画を追加
+                        </Link>
+                    </div>
                 </div>
 
                 {/* 検索とフィルター */}
@@ -182,65 +199,40 @@ export default function ContentsPage() {
                     </div>
                 </div>
 
-                {/* 動画グリッド（YouTube Premium風） */}
+                {/* 動画表示（ビューに応じて切り替え） */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                             <VideoCardSkeleton key={i} />
                         ))}
                     </div>
+                ) : view === 'list' ? (
+                    <ListView
+                        items={filteredVideos.map((video) => ({
+                            id: video.id,
+                            title: video.title,
+                            description: video.description,
+                            status: video.visibility === 'PUBLIC' ? '公開中' : video.visibility === 'UNLISTED' ? '限定公開' : '非公開',
+                            date: video.createdAt,
+                            tags: [`${formatViewCount(video.viewCount)}回視聴`, formatDate(video.createdAt)],
+                        }))}
+                        onView={(id) => window.location.href = `/contents/${id}`}
+                        onEdit={(id) => window.location.href = `/contents/${id}/edit`}
+                    />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredVideos.map((video) => (
-                            <Link
-                                key={video.id}
-                                href={`/contents/${video.id}`}
-                                className="group"
-                            >
-                                <div className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2">
-                                    {/* サムネイル */}
-                                    <div className="relative aspect-video bg-gray-200 overflow-hidden">
-                                        {video.thumbnailUrl ? (
-                                            <img
-                                                src={video.thumbnailUrl}
-                                                alt={video.title}
-                                                className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-200 ease-out"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                                                <Play className="w-16 h-16 text-gray-400" />
-                                            </div>
-                                        )}
-                                        {/* 再生時間 */}
-                                        {video.duration && (
-                                            <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/90 backdrop-blur-sm text-white text-xs font-bold rounded-lg">
-                                                {formatDuration(video.duration)}
-                                            </div>
-                                        )}
-                                        {/* ホバーオーバーレイ */}
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 ease-out flex items-center justify-center">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                                <Play className="w-16 h-16 text-white drop-shadow-2xl" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* 動画情報 */}
-                                    <div className="p-4">
-                                        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300 text-base leading-snug">
-                                            {video.title}
-                                        </h3>
-
-                                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                                            <span>{formatViewCount(video.viewCount)}回視聴</span>
-                                            <span className="text-slate-300">•</span>
-                                            <span>{formatDate(video.createdAt)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                    <CardView
+                        items={filteredVideos.map((video) => ({
+                            id: video.id,
+                            title: video.title,
+                            description: video.description,
+                            status: video.visibility === 'PUBLIC' ? '公開中' : video.visibility === 'UNLISTED' ? '限定公開' : '非公開',
+                            date: video.createdAt,
+                            tags: [`${formatViewCount(video.viewCount)}回視聴`, formatDate(video.createdAt)],
+                            thumbnail: video.thumbnailUrl,
+                        }))}
+                        onView={(id) => window.location.href = `/contents/${id}`}
+                        onEdit={(id) => window.location.href = `/contents/${id}/edit`}
+                    />
                 )}
 
                 {filteredVideos.length === 0 && !loading && (
