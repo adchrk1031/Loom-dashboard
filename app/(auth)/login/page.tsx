@@ -1,9 +1,8 @@
-'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -75,7 +74,16 @@ export default function LoginPage() {
             <div className="w-full max-w-md">
                 {/* ロゴ */}
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-black text-gray-900 mb-2">Loom</h1>
+                    <div className="flex justify-center mb-4">
+                        <Image
+                            src="/loom-logo.png"
+                            alt="Loom"
+                            width={200}
+                            height={80}
+                            priority
+                            className="h-16 w-auto"
+                        />
+                    </div>
                     <p className="text-gray-500 text-sm">次世代マーケティングプラットフォーム</p>
                 </div>
 
