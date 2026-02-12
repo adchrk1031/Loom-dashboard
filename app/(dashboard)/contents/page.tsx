@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ViewToggle from '@/components/ui/view-toggle';
 import ListView from '@/components/views/list-view';
 import CardView from '@/components/views/card-view';
+import { createClient } from '@/lib/supabase/client';
 
 interface Video {
     id: string;
@@ -54,55 +55,32 @@ export default function ContentsPage() {
     }, [view]);
 
     useEffect(() => {
-        // モックデータ（後でAPIから取得）
-        const mockVideos: Video[] = [
-            {
-                id: '1',
-                title: 'Loomプラットフォーム完全ガイド',
-                description: 'Loomの使い方を徹底解説します',
-                thumbnailUrl: 'https://placehold.co/640x360/6B8CAE/white?text=Video+1',
-                viewCount: 1234,
-                duration: 600,
-                visibility: 'PUBLIC',
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: '2',
-                title: 'マーケティング自動化の基礎',
-                description: '効率的なマーケティング戦略を学びます',
-                thumbnailUrl: 'https://placehold.co/640x360/8FA88E/white?text=Video+2',
-                viewCount: 856,
-                duration: 450,
-                visibility: 'PUBLIC',
-                createdAt: new Date(Date.now() - 86400000).toISOString(),
-            },
-            {
-                id: '3',
-                title: 'LINE配信の最適化テクニック',
-                description: '開封率を上げるためのノウハウ',
-                thumbnailUrl: 'https://placehold.co/640x360/D4A574/white?text=Video+3',
-                viewCount: 542,
-                duration: 720,
-                visibility: 'UNLISTED',
-                createdAt: new Date(Date.now() - 172800000).toISOString(),
-            },
-            {
-                id: '4',
-                title: 'データ分析で成果を最大化',
-                description: 'KPIの見方と改善方法',
-                thumbnailUrl: 'https://placehold.co/640x360/B87C7C/white?text=Video+4',
-                viewCount: 321,
-                duration: 540,
-                visibility: 'PUBLIC',
-                createdAt: new Date(Date.now() - 259200000).toISOString(),
-            },
-        ];
+        const fetchVideos = async () => {
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('videos')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-        // ローディングシミュレーション
-        setTimeout(() => {
-            setVideos(mockVideos);
+            if (error) {
+                console.error('Error fetching videos:', error);
+            } else if (data) {
+                setVideos(data.map((video) => ({
+                    id: video.id,
+                    title: video.title,
+                    description: video.description,
+                    thumbnailUrl: video.thumbnail_url,
+                    viewCount: video.view_count || 0,
+                    duration: video.duration,
+                    visibility: video.visibility,
+                    createdAt: video.created_at,
+                })));
+            }
+
             setLoading(false);
-        }, 800);
+        };
+
+        fetchVideos();
     }, []);
 
     const formatDuration = (seconds?: number) => {

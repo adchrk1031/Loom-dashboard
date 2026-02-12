@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, ArrowLeft, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 
 export default function VideoEditPage() {
     const params = useParams();
@@ -20,15 +21,35 @@ export default function VideoEditPage() {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        // モックデータ（後でAPIから取得）
-        setTitle('Loomプラットフォーム完全ガイド');
-        setDescription('Loomの使い方を徹底解説します');
-        setVideoUrl('https://www.youtube.com/embed/dQw4w9WgXcQ');
-        setThumbnailUrl('https://placehold.co/1280x720/6B8CAE/white?text=Video');
-        setVisibility('PUBLIC');
-        setAllowedTags(['副業', '人材']); // 例: 副業と人材タグのみ
-        setLoading(false);
-    }, [videoId]);
+        const fetchVideo = async () => {
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('videos')
+                .select('*')
+                .eq('id', videoId)
+                .single();
+
+            if (error) {
+                console.error('Error fetching video:', error);
+                alert('動画の読み込みに失敗しました');
+                router.push('/contents');
+                return;
+            }
+
+            if (data) {
+                setTitle(data.title || '');
+                setDescription(data.description || '');
+                setVideoUrl(data.video_url || '');
+                setThumbnailUrl(data.thumbnail_url || '');
+                setVisibility(data.visibility || 'PRIVATE');
+                setAllowedTags(data.allowed_tags || []);
+            }
+
+            setLoading(false);
+        };
+
+        fetchVideo();
+    }, [videoId, router]);
 
     const handleTagToggle = (tag: string) => {
         setAllowedTags((prev) =>
@@ -38,17 +59,46 @@ export default function VideoEditPage() {
 
     const handleSave = async () => {
         setSaving(true);
-        // TODO: APIにPOST
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const supabase = createClient();
+        const { error } = await supabase
+            .from('videos')
+            .update({
+                title,
+                description,
+                video_url: videoUrl,
+                thumbnail_url: thumbnailUrl,
+                visibility,
+                allowed_tags: allowedTags,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', videoId);
+
+        if (error) {
+            console.error('Error saving video:', error);
+            alert('保存に失敗しました');
+        } else {
+            alert('保存しました！');
+        }
+
         setSaving(false);
-        alert('保存しました！');
     };
 
     const handleDelete = async () => {
         if (!confirm('本当にこの動画を削除しますか？')) return;
-        // TODO: APIにDELETE
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        router.push('/contents');
+
+        const supabase = createClient();
+        const { error } = await supabase
+            .from('videos')
+            .delete()
+            .eq('id', videoId);
+
+        if (error) {
+            console.error('Error deleting video:', error);
+            alert('削除に失敗しました');
+        } else {
+            router.push('/contents');
+        }
     };
 
     if (loading) {
@@ -224,8 +274,8 @@ export default function VideoEditPage() {
                             <label
                                 key={tag}
                                 className={`flex items-center gap-2 px-4 py-2 border-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${allowedTags.includes(tag)
-                                        ? 'bg-blue-50 border-blue-500'
-                                        : 'border-gray-200 hover:bg-gray-50'
+                                    ? 'bg-blue-50 border-blue-500'
+                                    : 'border-gray-200 hover:bg-gray-50'
                                     }`}
                             >
                                 <input
