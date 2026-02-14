@@ -86,7 +86,6 @@ export default function LoginPage() {
                             className="h-16 w-auto"
                         />
                     </div>
-                    <p className="text-gray-500 text-sm">次世代マーケティングプラットフォーム</p>
                 </div>
 
                 {/* カード */}
